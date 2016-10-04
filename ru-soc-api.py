@@ -8,21 +8,20 @@ TOTAL_UNIQUE_COURSES = 0
 
 def main():
     subjects = get_all_subjects()
-    # subjects = [198, 180]
-
-
     start = timeit.default_timer()
-
     conn = sqlite3.connect('RU SOC.db')
     subjects_to_db(subjects, conn)
-
     conn.close()
-
     stop = timeit.default_timer()
 
-    print('duration: {}'.format(stop - start))
+    print('DURATION: {}'.format(stop - start))
+    # print('\n\n{}'.format(TOTAL_UNIQUE_COURSES))
 
-    print('\n\n{}'.format(TOTAL_UNIQUE_COURSES))
+    # TO DO HERE: FINISH THE REST API AND DETERMINE HOW YOU WANT THE QUEIRES TO COME IN.
+    # MORE TO DO: OPTIMIZE THE DATA FURTHUR, INCLUDE DURATION OF EACH CLASS TIME, AND OTHER INFORMATION
+    # GATHER MORE INFORMATIN FOR EACH SECTION AS WELL, ALONG WITH THE CURRENT ONES
+
+
     return
 
 
