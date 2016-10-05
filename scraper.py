@@ -49,10 +49,19 @@ def subjects_to_db(subjects, conn):
 
     ct = 0
     for result in request_results:  # requests all subjects
-        r = result.json()
+        try:
+            r = result.json()
+            print('URL: {} - - - - - - - - - - - - - - - - - - - - -'.format(result.url))
+        except (AttributeError, ConnectionError):
+            # keeps returning None so we need to keep track of original request url
+            time.sleep(1)
+            print(result.status_code)
+            time.sleep(10)
+
+
         # subjects_course_ct[s] = 0
 
-        print('URL: {} - - - - - - - - - - - - - - - - - - - - -'.format(result.url))
+
         for c in r:  # iterates through all courses within the subject
             # ct +=1
             course_unit_code = c['offeringUnitCode']
