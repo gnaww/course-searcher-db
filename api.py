@@ -14,7 +14,7 @@ class Courses(Resource):
         # Connect to databse
         conn = e.connect()
         # Perform query and return JSON data
-        query = conn.execute("select distinct name from Fall_2016_SOC")
+        query = conn.execute("select * from Fall_2016_SOC")
         return {'courses': [i[0] for i in query.cursor.fetchall()]}
 
 
