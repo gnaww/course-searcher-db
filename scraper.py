@@ -44,19 +44,20 @@ def subjects_to_db(subjects, conn):
     # subjects_course_ct = {}
     # print(len(subjects))
     request_urls = ['https://sis.rutgers.edu/soc/courses.json?subject={}&semester=92016&campus=NB&level=U'.format(s) for s in subjects]
-    all_requests = (grequests.get(u) for u in request_urls)
-    request_results = grequests.map(all_requests)
+    all_requests =  (grequests.get(u) for u in request_urls)
+    request_results = zip(grequests.map(all_requests), request_urls)
 
     ct = 0
     for result in request_results:  # requests all subjects
-        try:
-            r = result.json()
-            print('URL: {} - - - - - - - - - - - - - - - - - - - - -'.format(result.url))
-        except (AttributeError, ConnectionError):
-            # keeps returning None so we need to keep track of original request url
-            time.sleep(1)
-            print(result.status_code)
-            time.sleep(10)
+        while True:
+            try:
+                r = result[0].json()
+                print('URL: {} - - - - - - - - - - - - - - - - - - - - -'.format(result[0].url))
+            except (AttributeError, ConnectionError):
+                r = requests.get(result[1]).json()
+                print('URL: {} - - - - - - - - - - - - - - - - - - - - -'.format(result[0].url))
+                time.sleep(1)
+            break
 
 
         # subjects_course_ct[s] = 0
