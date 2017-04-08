@@ -1,1 +1,69 @@
-url: http://127.0.0.1:5000/courses
+example-url: http://127.0.0.1:5000/subjects
+# returns list of dict of all subjects
+example:
+{"subjects":
+	[
+	{"198":"computer science"},
+	{"182":"example2"},
+	{"...":"..."},
+	{"...":"..."},
+	{"...":"..."}
+	]
+}
+
+------------------------------------------------------------------------
+
+example-url: http://127.0.0.1:5000/subjects/198
+# returns list of courses for that subject
+example:
+{"courses":
+	[
+	{"198:211":"computer architecture"},
+	{"198:111":"intro to cs"},
+	{"198:112":"data structs"},
+	{"...":"..."},
+	{"...":"..."},
+	{"...":"..."}
+	]
+}
+
+
+----------------------------------------------------------------------------
+
+example-url: http://127.0.0.1:5000/courses
+# returns list of all courses regardless of subject
+{"courses":
+	[
+	{"198:211":"computer architecture"},
+	{"777:111":"intro to examples"},
+	{"777:112":"data examples"},
+	{"...":"..."},
+	{"...":"..."},
+	{"...":"..."}
+	]
+}
+
+----------------------------------------------------------------------------
+
+example-url: http://127.0.0.1:5000/courses/612
+# returns list of all courses that match the number regardless of subject
+{"courses":
+	[
+	{"198:211":"computer architecture"},
+	{"777:211":"intro to examples"},
+	{"888:211":"data examples"},
+	{"...":"..."},
+	{"...":"..."},
+	{"...":"..."}
+	]
+}
+
+
+----------------------------------------------------------------------------
+
+
+example-url: http://127.0.0.1:5000/subject/198/courses/111
+# returns that specific course in the subject
+
+
+

@@ -9,6 +9,14 @@ TOTAL_UNIQUE_COURSES = 0
 
 
 def main():
+    semester_campus_level_combos = [
+        {'Semester': '92016', 'Campus': 'NB', 'Level': 'U'},
+        {'Semester': '92016', 'Campus': 'NB', 'Level': 'G'},
+        {'Semester': '92016', 'Campus': 'NK', 'Level': 'U'},
+        {'Semester': '92016', 'Campus': 'NK', 'Level': 'G'},
+        {'Semester': '92016', 'Campus': 'CM', 'Level': 'U'},
+        {'Semester': '92016', 'Campus': 'CM', 'Level': 'G'}
+    ]
     subjects = get_all_subjects()
     start = timeit.default_timer()
     conn = sqlite3.connect('RU SOC.db')
