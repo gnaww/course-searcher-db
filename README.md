@@ -1,5 +1,5 @@
-# rutgers-soc-api
-A tool built to scrape and insert data from the Rutgers' Schedule of Classes into a cleaner and more optimized API.
+# rutgers-soc-pg-db
+A tool built to scrape and insert data from the Rutgers' Schedule of Classes into a PostgreSQL database.
 
 Credit: David Chen
 
