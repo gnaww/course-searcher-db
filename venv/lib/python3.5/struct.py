@@ -1,1 +1,1 @@
-/usr/lib/python3.5/struct.py
+D:/usr/lib/python3.5/struct.py

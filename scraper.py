@@ -10,16 +10,16 @@ TOTAL_UNIQUE_COURSES = 0
 
 def main():
     semester_campus_level_combos = [
-        {'Semester': '92016', 'Campus': 'NB', 'Level': 'U'},
-        {'Semester': '92016', 'Campus': 'NB', 'Level': 'G'},
-        {'Semester': '92016', 'Campus': 'NK', 'Level': 'U'},
-        {'Semester': '92016', 'Campus': 'NK', 'Level': 'G'},
-        {'Semester': '92016', 'Campus': 'CM', 'Level': 'U'},
-        {'Semester': '92016', 'Campus': 'CM', 'Level': 'G'}
+        {'Semester': '92018', 'Campus': 'NB', 'Level': 'U'},
+        {'Semester': '92018', 'Campus': 'NB', 'Level': 'G'},
+        {'Semester': '92018', 'Campus': 'NK', 'Level': 'U'},
+        {'Semester': '92018', 'Campus': 'NK', 'Level': 'G'},
+        {'Semester': '92018', 'Campus': 'CM', 'Level': 'U'},
+        {'Semester': '92018', 'Campus': 'CM', 'Level': 'G'}
     ]
     subjects = get_all_subjects()
     start = timeit.default_timer()
-    conn = sqlite3.connect('RU SOC.db')
+    conn = sqlite3.connect('RU SOC 2018.db')
     subjects_to_db(subjects, conn)
     conn.close()
     stop = timeit.default_timer()
@@ -36,7 +36,7 @@ def main():
 
 
 def get_all_subjects():
-    l = 'https://sis.rutgers.edu/soc/subjects.json?semester=92016&campus=NB&level=U'
+    l = 'https://sis.rutgers.edu/soc/subjects.json?semester=92018&campus=NB&level=U'
     r = requests.get(l).json()
     subjects = []
 
@@ -50,10 +50,10 @@ def subjects_to_db(subjects, conn):
     global TOTAL_UNIQUE_COURSES
     db_conn = conn.cursor()
     db_conn.execute(
-        '''CREATE TABLE IF NOT EXISTS Fall_2016_SOC(course_unit TEXT,course_subject TEXT,course_number TEXT,course_full_number TEXT,name TEXT,section_number TEXT,section_index TEXT,section_open_status TEXT,instructors TEXT,times TEXT,notes TEXT,exam_code TEXT,campus TEXT,credits INT,url TEXT,pre_reqs TEXT,core_codes TEXT,last_updated TEXT)''')
+        '''CREATE TABLE IF NOT EXISTS Fall_2018_SOC(course_unit TEXT,course_subject TEXT,course_number TEXT,course_full_number TEXT,name TEXT,section_number TEXT,section_index TEXT,section_open_status TEXT,instructors TEXT,times TEXT,notes TEXT,exam_code TEXT,campus TEXT,credits INT,url TEXT,pre_reqs TEXT,core_codes TEXT,last_updated TEXT)''')
     # subjects_course_ct = {}
     # print(len(subjects))
-    request_urls = ['https://sis.rutgers.edu/soc/courses.json?subject={}&semester=92016&campus=NB&level=U'.format(s) for
+    request_urls = ['https://sis.rutgers.edu/soc/courses.json?subject={}&semester=92018&campus=NB&level=U'.format(s) for
                     s in subjects]
     all_requests = (grequests.get(u) for u in request_urls)
     request_results = zip(grequests.map(all_requests), request_urls)
@@ -100,7 +100,7 @@ def subjects_to_db(subjects, conn):
                 section_notes = section['sectionNotes']
                 section_exam_code = section['examCode']
                 last_updated_time = time.strftime('%m-%d-%Y %H:%M')
-                db_conn.execute('insert into Fall_2016_SOC values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                db_conn.execute('insert into Fall_2018_SOC values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
                                 (course_unit_code,
                                  course_subject,
                                  course_number,
