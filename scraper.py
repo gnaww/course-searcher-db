@@ -56,6 +56,7 @@ def subjects_to_db(subjects, conn):
     db_conn = conn.cursor()
     db_conn.execute(
         '''
+        DROP TABLE IF EXISTS courses;
         CREATE TABLE IF NOT EXISTS public."courses"(
             course_unit integer,
             course_subject integer,
@@ -119,7 +120,7 @@ def subjects_to_db(subjects, conn):
             course_pre_reqs = c['preReqNotes']
             course_core_codes = json.dumps(placeholder)
             if c['coreCodes']:
-                json.dumps((c['coreCodes'])[0])
+                course_core_codes = json.dumps((c['coreCodes'])[0])
 
             for section in course_sections:
                 ct += 1
