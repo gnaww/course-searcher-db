@@ -1,4 +1,6 @@
-import sqlite3
+import psycopg2
+import json
+
 import time
 import timeit
 
@@ -19,7 +21,12 @@ def main():
     ]
     subjects = get_all_subjects()
     start = timeit.default_timer()
-    conn = sqlite3.connect('RU SOC 2018.db')
+    # dbpass = input("Please enter db password")
+    try:
+        conn = psycopg2.connect("dbname='courseplanner' user='postgres' host='localhost' password='redskies'")
+        # conn = psycopg2.connect("dbname='courseplanner' user='postgres' host='localhost' password='" + dbpass + "\'")
+    except:
+        print("db connection error")
     subjects_to_db(subjects, conn)
     conn.close()
     stop = timeit.default_timer()
@@ -31,7 +38,6 @@ def main():
     # MORE TO DO: OPTIMIZE THE DATA FURTHUR, INCLUDE DURATION OF EACH CLASS TIME, AND OTHER INFORMATION
     # GATHER MORE INFORMATIN FOR EACH SECTION AS WELL, ALONG WITH THE CURRENT ONES
 
-
     return
 
 
@@ -42,7 +48,6 @@ def get_all_subjects():
 
     for c in r:
         subjects.append(c['code'])
-
     return subjects
 
 
@@ -50,7 +55,33 @@ def subjects_to_db(subjects, conn):
     global TOTAL_UNIQUE_COURSES
     db_conn = conn.cursor()
     db_conn.execute(
-        '''CREATE TABLE IF NOT EXISTS Fall_2018_SOC(course_unit TEXT,course_subject TEXT,course_number TEXT,course_full_number TEXT,name TEXT,section_number TEXT,section_index TEXT,section_open_status TEXT,instructors TEXT,times TEXT,notes TEXT,exam_code TEXT,campus TEXT,credits INT,url TEXT,pre_reqs TEXT,core_codes TEXT,last_updated TEXT)''')
+        '''
+        CREATE TABLE IF NOT EXISTS public."courses"(
+            course_unit integer,
+            course_subject integer,
+            course_number integer,
+            course_full_number text COLLATE pg_catalog."default",
+            name text COLLATE pg_catalog."default",
+            section_number character(2) COLLATE pg_catalog."default",
+            section_index integer,
+            section_open_status text COLLATE pg_catalog."default",
+            instructors text COLLATE pg_catalog."default",
+            times jsonb,
+            notes text COLLATE pg_catalog."default",
+            exam_code character(1) COLLATE pg_catalog."default",
+            campus character(2) COLLATE pg_catalog."default",
+            credits real,
+            url text COLLATE pg_catalog."default",
+            pre_reqs text COLLATE pg_catalog."default",
+            core_codes jsonb,
+            last_updated text COLLATE pg_catalog."default"
+            )
+        '''
+    )
+    db_conn.execute('''
+                        PREPARE coursesplan (integer, integer, integer, text, text, character, integer, text, text, jsonb, text, character, character, real, text, text, jsonb, text) AS
+                            INSERT INTO courses VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18);'''
+    )
     # subjects_course_ct = {}
     # print(len(subjects))
     request_urls = ['https://sis.rutgers.edu/soc/courses.json?subject={}&semester=92018&campus=NB&level=U'.format(s) for
@@ -69,23 +100,26 @@ def subjects_to_db(subjects, conn):
                 print('URL: {} - - - - - - - - - - - - - - - - - - - - -'.format(result[0].url))
                 time.sleep(1)
             break
-
         # subjects_course_ct[s] = 0
-
-
+        placeholder = {}
+        print(r)
         for c in r:  # iterates through all courses within the subject
             # ct +=1
             course_unit_code = c['offeringUnitCode']
             course_subject = c['subject']
             course_number = c['courseNumber']
             course_full_num = '{}:{}:{}'.format(course_unit_code, course_subject, course_number)
-            course_short_title = c['title'].strip()
+            course_short_title = c['title'].strip().replace("'", "")
             course_sections = c['sections']
             course_campus = c['campusCode']
-            course_credits = c['credits']
+            course_credits = 0
+            if c['credits'] is not None:
+                course_credits = c['credits']
             course_url = c['synopsisUrl']
             course_pre_reqs = c['preReqNotes']
-            course_core_codes = str(c['coreCodes'])
+            course_core_codes = json.dumps(placeholder)
+            if c['coreCodes']:
+                json.dumps((c['coreCodes'])[0])
 
             for section in course_sections:
                 ct += 1
@@ -95,13 +129,27 @@ def subjects_to_db(subjects, conn):
                     section_open_status = 'OPEN'
                 else:
                     section_open_status = 'CLOSED'
-                section_instructors = str(section['instructors'])
-                section_times = str(section['meetingTimes'])
+
+                section_instructors = None
+                for d in section['instructors']:
+                    if section_instructors is not None:
+                        section_instructors += " and {}".format(d["name"])
+                    else:
+                        section_instructors = d["name"]
+                if section_instructors is not None:
+                    section_instructors = section_instructors.replace("'", "")
+
+                section_times = json.dumps((section['meetingTimes'][0]))
                 section_notes = section['sectionNotes']
+                if section['sectionNotes'] is not None:
+                    section_notes = section_notes.replace("'", "")
+
                 section_exam_code = section['examCode']
                 last_updated_time = time.strftime('%m-%d-%Y %H:%M')
-                db_conn.execute('insert into Fall_2018_SOC values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-                                (course_unit_code,
+                db_conn.execute('''
+                    EXECUTE coursesplan({}, {}, {}, \'{}\', \'{}\', \'{}\', {}, \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\');
+                    '''.format(
+                                 course_unit_code,
                                  course_subject,
                                  course_number,
                                  course_full_num,
@@ -118,7 +166,9 @@ def subjects_to_db(subjects, conn):
                                  course_url,
                                  course_pre_reqs,
                                  course_core_codes,
-                                 last_updated_time))
+                                 last_updated_time
+                        )
+                )
                 print('{} | '.format(ct), end='')
                 print('{}\t{}\tSECTION {}\tINDEX {}\t{}'.format(course_full_num, course_short_title, section_num,
                                                                 section_index, section_open_status))
