@@ -79,6 +79,15 @@ def subjects_to_db(subjects, conn):
             )
         '''
     )
+    db_conn.execute(
+        '''
+        DROP TABLE IF EXISTS courses_requirements;
+        CREATE TABLE IF NOT EXISTS public."courses_requirements"(
+            course text COLLATE pg_catalog."default",
+            requirement text COLLATE pg_catalog."default"
+            );
+        '''
+    )
     db_conn.execute('''
                         PREPARE coursesplan (integer, integer, integer, text, text, character, integer, text, text, jsonb, text, character, character, real, text, text, jsonb, text) AS
                             INSERT INTO courses VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18);'''
@@ -120,7 +129,7 @@ def subjects_to_db(subjects, conn):
             course_pre_reqs = c['preReqNotes']
             course_core_codes = json.dumps(placeholder)
             if c['coreCodes']:
-                course_core_codes = json.dumps((c['coreCodes'])[0])
+                course_core_codes = json.dumps((c['coreCodes']))
 
             for section in course_sections:
                 ct += 1
@@ -140,7 +149,7 @@ def subjects_to_db(subjects, conn):
                 if section_instructors is not None:
                     section_instructors = section_instructors.replace("'", "")
 
-                section_times = json.dumps((section['meetingTimes'][0]))
+                section_times = json.dumps((section['meetingTimes']))
                 section_notes = section['sectionNotes']
                 if section['sectionNotes'] is not None:
                     section_notes = section_notes.replace("'", "")
@@ -170,6 +179,8 @@ def subjects_to_db(subjects, conn):
                                  last_updated_time
                         )
                 )
+                for requirement in json.loads(course_core_codes):
+                    db_conn.execute("INSERT INTO courses_requirements(course, requirement) VALUES (\'{}\', \'{}\');".format(course_full_num, requirement['code']))
                 print('{} | '.format(ct), end='')
                 print('{}\t{}\tSECTION {}\tINDEX {}\t{}'.format(course_full_num, course_short_title, section_num,
                                                                 section_index, section_open_status))
@@ -177,7 +188,17 @@ def subjects_to_db(subjects, conn):
                 # print('{}\t{}'.format(course_full_num, course_short_title))
             TOTAL_UNIQUE_COURSES += 1
             # subjects_course_ct[s] += 1
-
+        # delete all duplicate rows in courses_requirements
+        db_conn.execute('''
+                DELETE FROM courses_requirements a USING (
+                    SELECT MIN(ctid) as ctid, course
+                    FROM courses_requirements 
+                    GROUP BY course HAVING COUNT(*) > 1
+                ) b
+                WHERE a.course = b.course
+                AND a.ctid <> b.ctid;
+                '''
+        )
         conn.commit()
         # except:
         #     secs_to_wait = 5
