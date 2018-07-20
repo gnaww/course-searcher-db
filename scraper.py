@@ -23,7 +23,7 @@ def main():
     start = timeit.default_timer()
     # dbpass = input("Please enter db password")
     try:
-        conn = psycopg2.connect("dbname='courseplanner' user='postgres' host='localhost' password='redskies'")
+        conn = psycopg2.connect("dbname='course-planner' user='postgres' host='127.0.0.1' password=''")
         # conn = psycopg2.connect("dbname='courseplanner' user='postgres' host='localhost' password='" + dbpass + "\'")
     except:
         print("db connection error")
@@ -98,7 +98,7 @@ def subjects_to_db(subjects, conn):
                 print('URL: {} - - - - - - - - - - - - - - - - - - - - -'.format(result[0].url))
             except (AttributeError, ConnectionError):
                 r = requests.get(result[1]).json()
-                print('URL: {} - - - - - - - - - - - - - - - - - - - - -'.format(result[0].url))
+                print('URL: {} - - - - - - - - - - - - - - - - - - - - -'.format(result[1].url))
                 time.sleep(1)
             break
         # subjects_course_ct[s] = 0
