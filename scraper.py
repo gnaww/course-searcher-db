@@ -23,8 +23,8 @@ def main():
     start = timeit.default_timer()
     # dbpass = input("Please enter db password")
     try:
+        # conn = psycopg2.connect("dbname='course-planner' user='postgres' host='127.0.0.1' password=''")
         conn = psycopg2.connect("dbname='course-planner' user='postgres' host='localhost' password='redskies'")
-        # conn = psycopg2.connect("dbname='courseplanner' user='postgres' host='localhost' password='" + dbpass + "\'")
     except:
         print("db connection error")
     subjects_to_db(subjects, conn)
