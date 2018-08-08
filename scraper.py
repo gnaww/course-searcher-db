@@ -189,16 +189,21 @@ def subjects_to_db(subjects, conn):
             TOTAL_UNIQUE_COURSES += 1
             # subjects_course_ct[s] += 1
         # delete all duplicate rows in courses_requirements
-        db_conn.execute('''
-                DELETE FROM courses_requirements a USING (
-                    SELECT MIN(ctid) as ctid, course
-                    FROM courses_requirements 
-                    GROUP BY course HAVING COUNT(*) > 1
-                ) b
-                WHERE a.course = b.course
-                AND a.ctid <> b.ctid;
-                '''
-        )
+        # db_conn.execute('''
+        #         DELETE FROM courses_requirements a USING (
+        #             SELECT MIN(ctid) as ctid, course
+        #             FROM courses_requirements
+        #             GROUP BY course HAVING COUNT(*) > 1
+        #         ) b
+        #         WHERE a.course = b.course
+        #         AND a.ctid <> b.ctid;
+        #         '''
+        # )
+        db_conn.execute('''DELETE FROM courses_requirements
+                           WHERE ctid not in
+                           (SELECT MIN(ctid)
+                           FROM courses_requirements
+                           GROUP BY course, requirement)''')
         conn.commit()
         # except:
         #     secs_to_wait = 5
