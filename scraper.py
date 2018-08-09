@@ -111,7 +111,7 @@ def subjects_to_db(subjects, conn):
                 time.sleep(1)
             break
         # subjects_course_ct[s] = 0
-        placeholder = {}
+        placeholder = []
         print(r)
         for c in r:  # iterates through all courses within the subject
             # ct +=1
