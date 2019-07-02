@@ -23,8 +23,8 @@ def main():
     start = timeit.default_timer()
     # dbpass = input("Please enter db password")
     try:
-        conn = psycopg2.connect("dbname='course-planner' user='postgres' host='127.0.0.1' password=''")
-        # conn = psycopg2.connect("dbname='courseplanner' user='postgres' host='localhost' password='" + dbpass + "\'")
+        # conn = psycopg2.connect("dbname='course-planner' user='postgres' host='127.0.0.1' password=''")
+        conn = psycopg2.connect("dbname='course-planner' user='postgres' host='localhost' password='redskies'")
     except:
         print("db connection error")
     subjects_to_db(subjects, conn)
@@ -81,11 +81,24 @@ def subjects_to_db(subjects, conn):
     )
     db_conn.execute(
         '''
+        CREATE INDEX course_full_number_index on courses (course_full_number);
+        CREATE INDEX name_index on courses (name);
+        CREATE INDEX section_index_index on courses (section_index);
+        CREATE INDEX instructors_index on courses (instructors);
+        '''
+    )
+    db_conn.execute(
+        '''
         DROP TABLE IF EXISTS courses_requirements;
         CREATE TABLE IF NOT EXISTS public."courses_requirements"(
             course text COLLATE pg_catalog."default",
             requirement text COLLATE pg_catalog."default"
             );
+        '''
+    )
+    db_conn.execute(
+        '''
+        CREATE INDEX course_index on courses_requirements (course);
         '''
     )
     db_conn.execute('''
